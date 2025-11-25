@@ -1,0 +1,51 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* left;
+    Node* right;
+    Node(int d): data(d), left(nullptr), right(nullptr) {}
+};
+
+Node* insert(Node* root, int data) {
+    if (!root) return new Node(data);
+    if (data < root->data) root->left = insert(root->left, data);
+    else root->right = insert(root->right, data);
+    return root;
+}
+
+vector<int> rightView(Node* root) {
+    vector<int> res;
+    if (!root) return res;
+    queue<Node*> q;
+    q.push(root);
+
+    while (!q.empty()) {
+        int n = q.size();
+        for (int i = 1; i <= n; i++) {
+            Node* temp = q.front(); q.pop();
+            if (i == n) res.push_back(temp->data);
+            if (temp->left) q.push(temp->left);
+            if (temp->right) q.push(temp->right);
+        }
+    }
+    return res;
+}
+
+int main() {
+    Node* root = nullptr;
+    root = insert(root, 10);
+    insert(root, 6);
+    insert(root, 15);
+    insert(root, 3);
+    insert(root, 8);
+    insert(root, 12);
+    insert(root, 20);
+
+    vector<int> rv = rightView(root);
+    for (int x : rv) cout << x << " ";
+    return 0;
+}
