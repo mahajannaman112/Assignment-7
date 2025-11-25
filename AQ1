@@ -1,0 +1,36 @@
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* left;
+    Node* right;
+    Node(int d): data(d), left(nullptr), right(nullptr) {}
+};
+
+Node* insert(Node* root, int data) {
+    if (!root) return new Node(data);
+    if (data < root->data) root->left = insert(root->left, data);
+    else root->right = insert(root->right, data);
+    return root;
+}
+
+int sumLeftLeaves(Node* root, bool isLeft = false) {
+    if (!root) return 0;
+    if (!root->left && !root->right && isLeft) return root->data;
+    return sumLeftLeaves(root->left, true) + sumLeftLeaves(root->right, false);
+}
+
+int main() {
+    Node* root = nullptr;
+    root = insert(root, 10);
+    insert(root, 5);
+    insert(root, 15);
+    insert(root, 3);
+    insert(root, 7);
+    insert(root, 12);
+    insert(root, 18);
+
+    cout << "Sum of left leaves: " << sumLeftLeaves(root) << endl;
+    return 0;
+}
