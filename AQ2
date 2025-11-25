@@ -1,0 +1,73 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Node {
+    int val;
+    Node* left;
+    Node* right;
+    Node(int v): val(v), left(nullptr), right(nullptr) {}
+};
+
+vector<Node*> generate(int s, int e) {
+    vector<Node*> res;
+    if (s > e) { res.push_back(nullptr); return res; }
+    for (int i = s; i <= e; ++i) {
+        vector<Node*> left = generate(s, i - 1);
+        vector<Node*> right = generate(i + 1, e);
+        for (Node* L : left) {
+            for (Node* R : right) {
+                Node* root = new Node(i);
+                root->left = L;
+                root->right = R;
+                res.push_back(root);
+            }
+        }
+    }
+    return res;
+}
+
+string serializeLevel(Node* root) {
+    if (!root) return "[]";
+    queue<Node*> q;
+    q.push(root);
+    vector<string> out;
+    while (!q.empty()) {
+        Node* cur = q.front(); q.pop();
+        if (cur) {
+            out.push_back(to_string(cur->val));
+            q.push(cur->left);
+            q.push(cur->right);
+        } else {
+            out.push_back("null");
+        }
+    }
+    while (!out.empty() && out.back() == "null") out.pop_back();
+    string s = "[";
+    for (size_t i = 0; i < out.size(); ++i) {
+        if (i) s += ",";
+        s += out[i];
+    }
+    s += "]";
+    return s;
+}
+
+void freeTree(Node* root) {
+    if (!root) return;
+    freeTree(root->left);
+    freeTree(root->right);
+    delete root;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n;
+    if (!(cin >> n)) n = 3;
+    vector<Node*> trees = generate(1, n);
+    cout << "Number of unique BSTs: " << trees.size() << "\n";
+    for (size_t i = 0; i < trees.size(); ++i) {
+        cout << i+1 << ": " << serializeLevel(trees[i]) << "\n";
+    }
+    for (Node* t : trees) freeTree(t);
+    return 0;
+}
