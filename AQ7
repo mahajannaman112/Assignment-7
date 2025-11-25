@@ -1,0 +1,105 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Node {
+    int val;
+    Node* left;
+    Node* right;
+    Node(int v): val(v), left(nullptr), right(nullptr) {}
+};
+
+Node* insertBST(Node* root, int key) {
+    if (!root) return new Node(key);
+    if (key < root->val) root->left = insertBST(root->left, key);
+    else if (key > root->val) root->right = insertBST(root->right, key);
+    return root;
+}
+
+void bstToDLLUtil(Node* root, Node*& head, Node*& prev) {
+    if (!root) return;
+    bstToDLLUtil(root->left, head, prev);
+    if (!prev) head = root;
+    else {
+        prev->right = root;
+        root->left = prev;
+    }
+    prev = root;
+    bstToDLLUtil(root->right, head, prev);
+}
+
+Node* bstToSortedDLL(Node* root) {
+    Node* head = nullptr;
+    Node* prev = nullptr;
+    bstToDLLUtil(root, head, prev);
+    return head;
+}
+
+Node* mergeDLL(Node* a, Node* b) {
+    if (!a) return b;
+    if (!b) return a;
+    Node* head = nullptr;
+    Node* tail = nullptr;
+    while (a && b) {
+        Node* pick = nullptr;
+        if (a->val <= b->val) { pick = a; a = a->right; }
+        else { pick = b; b = b->right; }
+        pick->left = pick->right = nullptr;
+        if (!head) head = tail = pick;
+        else { tail->right = pick; pick->left = tail; tail = pick; }
+    }
+    while (a) {
+        Node* nxt = a->right;
+        a->left = a->right = nullptr;
+        if (!head) head = tail = a;
+        else { tail->right = a; a->left = tail; tail = a; }
+        a = nxt;
+    }
+    while (b) {
+        Node* nxt = b->right;
+        b->left = b->right = nullptr;
+        if (!head) head = tail = b;
+        else { tail->right = b; b->left = tail; tail = b; }
+        b = nxt;
+    }
+    return head;
+}
+
+void printDLL(Node* head) {
+    Node* t = head;
+    while (t) {
+        cout << t->val;
+        if (t->right) cout << " <-> ";
+        t = t->right;
+    }
+    cout << "\n";
+}
+
+int main() {
+    Node* root1 = nullptr;
+    root1 = insertBST(root1, 20);
+    insertBST(root1, 10);
+    insertBST(root1, 30);
+    insertBST(root1, 5);
+    insertBST(root1, 15);
+
+    Node* root2 = nullptr;
+    root2 = insertBST(root2, 25);
+    insertBST(root2, 22);
+    insertBST(root2, 35);
+    insertBST(root2, 12);
+    insertBST(root2, 28);
+
+    Node* dll1 = bstToSortedDLL(root1);
+    Node* dll2 = bstToSortedDLL(root2);
+
+    cout << "Doubly Linked List from BST1:\n";
+    printDLL(dll1);
+    cout << "Doubly Linked List from BST2:\n";
+    printDLL(dll2);
+
+    Node* merged = mergeDLL(dll1, dll2);
+    cout << "Merged sorted Doubly Linked List:\n";
+    printDLL(merged);
+
+    return 0;
+}
