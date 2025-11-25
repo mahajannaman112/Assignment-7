@@ -1,52 +1,64 @@
-#include <iostream>
-#include <vector>
-#include <queue>
+#include <bits/stdc++.h>
 using namespace std;
 
 struct Node {
-    int data;
+    int val;
     Node* left;
     Node* right;
-    Node(int d): data(d), left(nullptr), right(nullptr) {}
+    Node(int v): val(v), left(nullptr), right(nullptr) {}
 };
 
-Node* insert(Node* root, int data) {
-    if (!root) return new Node(data);
-    if (data < root->data) root->left = insert(root->left, data);
-    else root->right = insert(root->right, data);
+Node* buildRec(const vector<int>& pre, int preL, int preR,
+               const vector<int>& in, int inL, int inR,
+               unordered_map<int,int>& idx) {
+    if (preL > preR || inL > inR) return nullptr;
+    int rootVal = pre[preL];
+    Node* root = new Node(rootVal);
+    int inRoot = idx[rootVal];
+    int leftSize = inRoot - inL;
+    root->left = buildRec(pre, preL + 1, preL + leftSize, in, inL, inRoot - 1, idx);
+    root->right = buildRec(pre, preL + leftSize + 1, preR, in, inRoot + 1, inR, idx);
     return root;
 }
 
-vector<int> rightView(Node* root) {
-    vector<int> res;
-    if (!root) return res;
-    queue<Node*> q;
-    q.push(root);
+Node* buildTree(const vector<int>& preorder, const vector<int>& inorder) {
+    if (preorder.size() != inorder.size()) return nullptr;
+    int n = preorder.size();
+    unordered_map<int,int> idx;
+    for (int i = 0; i < n; ++i) idx[inorder[i]] = i;
+    return buildRec(preorder, 0, n-1, inorder, 0, n-1, idx);
+}
 
-    while (!q.empty()) {
-        int size = q.size();
-        for (int i = 0; i < size; i++) {
-            Node* cur = q.front();
-            q.pop();
-            if (i == size - 1) res.push_back(cur->data);
-            if (cur->left) q.push(cur->left);
-            if (cur->right) q.push(cur->right);
-        }
-    }
-    return res;
+void printPre(Node* root) {
+    if (!root) return;
+    cout << root->val << " ";
+    printPre(root->left);
+    printPre(root->right);
+}
+
+void printIn(Node* root) {
+    if (!root) return;
+    printIn(root->left);
+    cout << root->val << " ";
+    printIn(root->right);
 }
 
 int main() {
-    Node* root = nullptr;
-    root = insert(root, 10);
-    insert(root, 6);
-    insert(root, 15);
-    insert(root, 3);
-    insert(root, 8);
-    insert(root, 12);
-    insert(root, 20);
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
 
-    vector<int> ans = rightView(root);
-    for (int x : ans) cout << x << " ";
+    int n;
+    if (!(cin >> n)) return 0;
+    vector<int> preorder(n), inorder(n);
+    for (int i = 0; i < n; ++i) cin >> preorder[i];
+    for (int i = 0; i < n; ++i) cin >> inorder[i];
+
+    Node* root = buildTree(preorder, inorder);
+
+    cout << "Constructed tree (Preorder): ";
+    printPre(root);
+    cout << "\nConstructed tree (Inorder): ";
+    printIn(root);
+    cout << "\n";
     return 0;
 }
