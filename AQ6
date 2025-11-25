@@ -1,0 +1,73 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Node {
+    int val;
+    Node* left;
+    Node* right;
+    Node(int v): val(v), left(nullptr), right(nullptr) {}
+};
+
+Node* buildRec(const vector<int>& in, int inL, int inR,
+               const vector<int>& post, int postL, int postR,
+               unordered_map<int,int>& idx) {
+    if (inL > inR || postL > postR) return nullptr;
+    int rootVal = post[postR];
+    Node* root = new Node(rootVal);
+    int inRoot = idx[rootVal];
+    int leftSize = inRoot - inL;
+    root->left = buildRec(in, inL, inRoot - 1, post, postL, postL + leftSize - 1, idx);
+    root->right = buildRec(in, inRoot + 1, inR, post, postL + leftSize, postR - 1, idx);
+    return root;
+}
+
+Node* buildTree(const vector<int>& inorder, const vector<int>& postorder) {
+    if (inorder.size() != postorder.size()) return nullptr;
+    int n = inorder.size();
+    unordered_map<int,int> idx;
+    for (int i = 0; i < n; ++i) idx[inorder[i]] = i;
+    return buildRec(inorder, 0, n - 1, postorder, 0, n - 1, idx);
+}
+
+void printPre(Node* root) {
+    if (!root) return;
+    cout << root->val << " ";
+    printPre(root->left);
+    printPre(root->right);
+}
+
+void printIn(Node* root) {
+    if (!root) return;
+    printIn(root->left);
+    cout << root->val << " ";
+    printIn(root->right);
+}
+
+void printPost(Node* root) {
+    if (!root) return;
+    printPost(root->left);
+    printPost(root->right);
+    cout << root->val << " ";
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    if (!(cin >> n)) return 0;
+    vector<int> inorder(n), postorder(n);
+    for (int i = 0; i < n; ++i) cin >> inorder[i];
+    for (int i = 0; i < n; ++i) cin >> postorder[i];
+
+    Node* root = buildTree(inorder, postorder);
+
+    cout << "Preorder: ";
+    printPre(root);
+    cout << "\nInorder: ";
+    printIn(root);
+    cout << "\nPostorder: ";
+    printPost(root);
+    cout << "\n";
+    return 0;
+}
