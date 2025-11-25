@@ -1,0 +1,36 @@
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* left;
+    Node* right;
+    Node(int d): data(d), left(nullptr), right(nullptr) {}
+};
+
+Node* insert(Node* root, int data) {
+    if (!root) return new Node(data);
+    if (data < root->data) root->left = insert(root->left, data);
+    else root->right = insert(root->right, data);
+    return root;
+}
+
+int maxDepth(Node* root) {
+    if (!root) return 0;
+    int leftDepth = maxDepth(root->left);
+    int rightDepth = maxDepth(root->right);
+    return 1 + max(leftDepth, rightDepth);
+}
+
+int main() {
+    Node* root = nullptr;
+    root = insert(root, 10);
+    insert(root, 6);
+    insert(root, 15);
+    insert(root, 3);
+    insert(root, 8);
+    insert(root, 20);
+
+    cout << "Maximum Depth: " << maxDepth(root) << endl;
+    return 0;
+}
